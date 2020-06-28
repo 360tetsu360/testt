@@ -1,87 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 	<head>
+		<title>File</title>
 		<meta charset="utf-8">
-		<title>My first three.js app</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
-			body { margin: 0; }
-			canvas { display: block; }
+			body {
+				color: #ffffff;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				font-weight: bold;
+
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index:100;
+			}
+
 		</style>
 	</head>
+
 	<body>
-		<form action="#">
-			<p>アップロードするファイルを選択して下さい。</p>
-			<p><input type="file" name="s_file" id=file accept="image/png" multiple></p>
-		</form>
+	<input id="file" type="file">
+
 		<script src="three.min.js"></script>
 		<script src="TrackballControls.js"></script>
-		<script>
-	var scene = new THREE.Scene();
+
+
+    <script>
+
+// シーンの作成
+var scene = new THREE.Scene();
+// カメラの作成
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-
-
-
-var renderer = new THREE.WebGLRenderer();
+// レンダラーの作成（アンチエイリアス有効）
+var renderer = new THREE.WebGLRenderer( {antialias: true} );
+// レンダラーが描画するキャンバスサイズの設定
 renderer.setSize( window.innerWidth, window.innerHeight );
+// キャンバスをDOMツリーに追加
 document.body.appendChild( renderer.domElement );
+
+
+// 環境光の作成
+var light = new THREE.AmbientLight( 0xffffff ); // soft white light
+// 環境光をシーンへ追加
+scene.add( light );
+
+// TrackballControlsインスタンス作成
 var controls = new THREE.TrackballControls( camera );
-var geometry = new THREE.BoxGeometry();
+
+// ジオメトリの作成
+var geometry = new THREE.BoxGeometry( 2, 2, 2 );
+
+// マテリアルの作成
 var material = new THREE.MeshBasicMaterial( { color: 0xffffff} );
+
+// オブジェクトの作成
 var cube = new THREE.Mesh( geometry, material );
+// オブジェクト傾き調整
+cube.rotation.y = Math.PI/4;
+cube.rotation.x = Math.PI/8;
+cube.rotation.z = Math.PI/8;
+
+// オブジェクトをシーンに追加
 scene.add( cube );
 
+// カメラ位置調整
 camera.position.z = 5;
+camera.position.x = 0.5;
+camera.position.y = 0.5;
 
-var animate = function () {
-requestAnimationFrame( animate );
+var filechange = document.getElementById( 'file' );
+filechange.addEventListener( 'change', textureSwitch, false );
 
-cube.rotation.x += 0.01;
-cube.rotation.y += 0.01;
 
-renderer.render( scene, camera );
-};
+function render(){
+	// requestAnimationFrameで自分自身を呼び出し続けることでレンダリングを繰り返す
+	requestAnimationFrame( render );
 
-animate();
+	// レンダリング（表示）
+	renderer.render(scene,camera);
 
-function pasting(file) {
-	event.preventDefault();
-    // プレビュー画像を追加する要素
-    const preview = document.getElementById('preview');
-  
-    // FileReaderオブジェクトを作成
-    const reader = new FileReader();
-  
-    // ファイルが読み込まれたときに実行する
-    reader.onload = function (e) {
-	  const URL = e.target.result;
-      const img = document.createElement("img"); // img要素を作成
-      img.src = URL; // 画像のURLをimg要素にセット
-      cube.material.map = new THREE.Texture( { map: img} );
-	  cube.material.map.needsUpdate = true;
-	}
-	reader.readAsDataURL(file);
+	controls.update();
+}
+render();
+
+
+function textureSwitch( event ){
+   // 要素内イベントのキャンセル
+   event.preventDefault();
+   // 1つ目のファイルのみ読み込む
+   var file = event.target.files[0];
+
+   // FileReader オブジェクトの作成
+   var reader = new FileReader();
+
+
+   reader.onload = function( event ) {
+   
+      // 「img」でエレメントオブジェクト作成
+      var img = document.createElement( 'img' );
+
+      img.src = event.target.result;
+
+      // テクスチャの更新
+      cube.material.map = new THREE.Texture( img );
+      cube.material.map.needsUpdate = true;
+      
+   };
+    // データURLとしてファイルを読み込む
+    reader.readAsDataURL( file );
 }
 
 
+    </script>
 
+  </body>
 
+  </html>
 
-
-
-
-
-
-const fileInput = document.getElementById('file');
-const handleFileSelect = () => {
-  const files = fileInput.files;
-  for (let i = 0; i < files.length; i++) {
-    pasting(files[i]);
-  }
-}
-fileInput.addEventListener('change', handleFileSelect)
-
-
-		</script>
-	</body>
-</html>
