@@ -30,7 +30,8 @@
 	<body>
 	<input id="file" type="file">
 
-		<script src="three.js"></script>
+		<script src="../js/three.min.js"></script>
+		<script src="../js/TrackballControls.js"></script>
 
 
     <script>
@@ -53,13 +54,13 @@ var light = new THREE.AmbientLight( 0xffffff ); // soft white light
 scene.add( light );
 
 // TrackballControlsインスタンス作成
-
+var controls = new THREE.TrackballControls( camera );
 
 // ジオメトリの作成
 var geometry = new THREE.BoxGeometry( 2, 2, 2 );
 
 // マテリアルの作成
-var material = new THREE.MeshBasicMaterial( { color: 0xffffff} );
+var material = new THREE.MeshBasicMaterial( { color: 0xffffff, map: new THREE.TextureLoader().load( '../image/file.png' ), specularMap: 0xcccccc, side: THREE.DoubleSide } );
 
 // オブジェクトの作成
 var cube = new THREE.Mesh( geometry, material );
@@ -87,6 +88,7 @@ function render(){
 	// レンダリング（表示）
 	renderer.render(scene,camera);
 
+	controls.update();
 }
 render();
 
@@ -123,4 +125,3 @@ function textureSwitch( event ){
   </body>
 
   </html>
-
