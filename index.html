@@ -13,9 +13,10 @@
 			<p>アップロードするファイルを選択して下さい。</p>
 			<p><input type="file" name="s_file" id=file accept="image/png" multiple></p>
 		</form>
-		<script src="three.js"></script>
+		<script src="three.min.js"></script>
+		<script src="TrackballControls.js"></script>
 		<script>
-var scene = new THREE.Scene();
+	var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
 
@@ -24,10 +25,9 @@ var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHe
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
-
+var controls = new THREE.TrackballControls( camera );
 var geometry = new THREE.BoxGeometry();
 var material = new THREE.MeshBasicMaterial( { color: 0xffffff} );
-
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
 
@@ -44,33 +44,43 @@ renderer.render( scene, camera );
 
 animate();
 
-var filechange = document.getElementById( 'file' );
-filechange.addEventListener( 'change', textureSwitch, false );
-
-
-function textureSwitch( event ){
-   // 要素内イベントのキャンセル
-   event.preventDefault();
-   
-   // 1つ目のファイルを読み込む
-   var file = event.target.files[0];
- 
-   // FileReader オブジェクトの作成
-   var reader = new FileReader();
- 
-   reader.onload = function( event ) {
-      // 「img」でエレメントオブジェクト作成
-      var img = document.createElement( 'img' );
- 
-      img.src = event.target.result;
- 
-      // テクスチャの更新（meshは作成済みのオブジェクト）
-      cube.material.map = new THREE.Texture( img );
-      cube.material.map.needsUpdate = true;
-   };
-    // データURLとしてファイルを読み込む
-    reader.readAsDataURL( file );
+function pasting(file) {
+	event.preventDefault();
+    // プレビュー画像を追加する要素
+    const preview = document.getElementById('preview');
+  
+    // FileReaderオブジェクトを作成
+    const reader = new FileReader();
+  
+    // ファイルが読み込まれたときに実行する
+    reader.onload = function (e) {
+	  const URL = e.target.result;
+      const img = document.createElement("img"); // img要素を作成
+      img.src = URL; // 画像のURLをimg要素にセット
+      cube.material.map = new THREE.Texture( { map: img} );
+	  cube.material.map.needsUpdate = true;
+	}
+	reader.readAsDataURL(file);
 }
+
+
+
+
+
+
+
+
+
+
+const fileInput = document.getElementById('file');
+const handleFileSelect = () => {
+  const files = fileInput.files;
+  for (let i = 0; i < files.length; i++) {
+    pasting(files[i]);
+  }
+}
+fileInput.addEventListener('change', handleFileSelect)
+
 
 		</script>
 	</body>
